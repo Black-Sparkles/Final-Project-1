@@ -1,28 +1,49 @@
 pipeline {
     agent any
+
     environment {
-        IMAGE_NAME = "calculator-app"
-        IMAGE_TAG = "latest"
+        IMAGE_NAME = "oluwatoyosi/calculator-app"
+        CONTAINER_NAME = "calculator-app"
     }
+
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
                 git branch: 'project-1', url: 'https://github.com/Black-Sparkles/Final-Project-1.git'
             }
         }
-        stage('Build WAR Package') {
+
+        stage('Build WAR') {
             steps {
-                sh 'mvn clean package'
+                script {
+                    docker.image('maven:3.8.1-openjdk-8').inside {
+                        sh 'mvn clean package'
+                    }
+                }
             }
         }
+
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
-        stage('Run Docker Container') {
+
+        stage('Push to Docker Hub') {
             steps {
-                sh "docker run -d -p 8080:8080 ${IMAGE_NAME}:${IMAGE_TAG}"
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh 'docker push $IMAGE_NAME'
+                }
+            }
+        }
+
+        stage('Deploy Container') {
+            steps {
+                sh '''
+                    docker rm -f $CONTAINER_NAME || true
+                    docker run -d --name $CONTAINER_NAME -p 8081:8080 $IMAGE_NAME
+                '''
             }
         }
     }
