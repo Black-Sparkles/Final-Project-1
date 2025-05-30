@@ -1,26 +1,37 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3.8.4-openjdk-11'
+        }
+    }
+    environment {
+        IMAGE_NAME = "calculator-app"
+        IMAGE_TAG = "latest"
+    }
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'project-1', url: 'https://github.com/Black-Sparkles/Final-Project-1.git'
+                git branch: 'project-1', url: 'https://github.com/<your-username>/proj-mdp-152-155.git'
+            }
+        }
+        stage('Build WAR Package') {
+            steps {
+                sh 'mvn clean package'
             }
         }
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("calculator-app:${env.BUILD_NUMBER}")
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
                 }
             }
         }
-        stage('Run Container') {
+        stage('Run Docker Container') {
             steps {
                 script {
-                    docker.image("calculator-app:${env.BUILD_NUMBER}")
-                          .run("-d -p 8080:8080")
+                    sh "docker run -d -p 8080:8080 ${IMAGE_NAME}:${IMAGE_TAG}"
                 }
             }
         }
     }
 }
-
