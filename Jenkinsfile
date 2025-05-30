@@ -7,15 +7,12 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'project-1', url: 'https://github.com/Black-Sparkles/Final-Project-1.git'
+                git branch: 'project-1', url: 'https://github.com/F/Final-Project-1.git'
             }
         }
-        stage('Install Maven and Build WAR') {
+        stage('Build WAR Package') {
             steps {
-                sh '''
-                    sudo yum install -y maven || true
-                    mvn clean package
-                '''
+                sh 'mvn clean package'
             }
         }
         stage('Build Docker Image') {
