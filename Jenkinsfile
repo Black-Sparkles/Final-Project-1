@@ -15,11 +15,9 @@ pipeline {
 
         stage('Build WAR') {
             steps {
-                script {
-                    docker.image('maven:3.8.1-openjdk-8').inside {
-                        sh 'mvn clean package'
-                    }
-                }
+                sh '''
+                    mvn clean package
+                '''
             }
         }
 
