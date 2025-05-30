@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'project-1', url: 'https://github.com/<your-username>/proj-mdp-152-155.git'
+                git branch: 'project-1', url: 'https://github.com/Black-Sparkles/Final-Project-1.git'
             }
         }
         stage('Build WAR Package') {
