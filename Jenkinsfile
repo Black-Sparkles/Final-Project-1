@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -15,9 +16,11 @@ pipeline {
 
         stage('Build WAR') {
             steps {
-                sh '''
-                    mvn clean package
-                '''
+                script {
+                    docker.image('maven:3.8.1-openjdk-8').inside {
+                        sh 'mvn clean package'
+                    }
+                }
             }
         }
 
@@ -40,7 +43,7 @@ pipeline {
             steps {
                 sh '''
                     docker rm -f $CONTAINER_NAME || true
-                    docker run -d --name $CONTAINER_NAME -p 8081:8080 $IMAGE_NAME
+                    docker run -d --name $CONTAINER_NAME -p 8090:8080 $IMAGE_NAME
                 '''
             }
         }
