@@ -1,50 +1,50 @@
-
 pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "oluwatoyosi/calculator-app"
-        CONTAINER_NAME = "calculator-app"
+        DOCKER_HUB_CREDENTIALS = 'dockerhub-creds'  
+        DOCKER_IMAGE = 'oluwatoyosi/calculator-app'
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clone') {
             steps {
                 git branch: 'project-1', url: 'https://github.com/Black-Sparkles/Final-Project-1.git'
             }
         }
 
-        stage('Build WAR') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    docker.image('maven:3.8.1-openjdk-8').inside {
-                        sh 'mvn clean package'
+                    dockerImage = docker.build("${DOCKER_IMAGE}:latest")
+                }
+            }
+        }
+
+        stage('Login to DockerHub') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS}") {
+                        echo "Logged in to Docker Hub"
                     }
                 }
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Push to DockerHub') {
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
-            }
-        }
-
-        stage('Push to Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh 'docker push $IMAGE_NAME'
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS}") {
+                        dockerImage.push('latest')
+                    }
                 }
             }
         }
 
-        stage('Deploy Container') {
+        stage('Run Container') {
             steps {
-                sh '''
-                    docker rm -f $CONTAINER_NAME || true
-                    docker run -d --name $CONTAINER_NAME -p 8090:8080 $IMAGE_NAME
-                '''
+                sh 'docker rm -f calculator || true'
+                sh "docker run -d --name calculator -p 9000:8080 ${DOCKER_IMAGE}:latest"
             }
         }
     }
