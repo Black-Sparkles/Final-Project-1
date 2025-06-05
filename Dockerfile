@@ -6,6 +6,6 @@ RUN mvn clean package
 
 # Stage 2: Deploy the WAR on Tomcat
 FROM tomcat:9.0
-COPY --from=build /app/target/WebAppCal-1.3.5.war /usr/local/tomcat/webapps/app.war
+COPY --from=build /app/target/WebAppCal-1.3.5.war /usr/local/tomcat/webapps/calculator.war
 EXPOSE 9000
 CMD ["catalina.sh", "run"]
