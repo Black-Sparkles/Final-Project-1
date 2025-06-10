@@ -1,0 +1,31 @@
+- name: Install kops and dependencies
+  hosts: kops_admin
+  become: yes
+  tasks:
+    - name: Install unzip, curl
+      yum:
+        name:
+          - unzip
+          - curl
+        state: present
+
+    - name: Install AWS CLI v2
+      shell: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip -o awscliv2.zip
+        sudo ./aws/install
+      args:
+        creates: /usr/local/bin/aws
+
+    - name: Install kubectl
+      get_url:
+        url: https://dl.k8s.io/release/v1.27.4/bin/linux/amd64/kubectl
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+
+    - name: Install kops
+      get_url:
+        url: https://github.com/kubernetes/kops/releases/download/v1.27.0/kops-linux-amd64
+        dest: /usr/local/bin/kops
+        mode: '0755'
+
