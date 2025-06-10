@@ -120,3 +120,6 @@ terraform/terraform.tfstate.backup
 terraform.tfstate.backup
 terraform/terraform.tfstate
 terraform.tfstate
+*.tfstate
+*.tfstate.backup
+crash.log
