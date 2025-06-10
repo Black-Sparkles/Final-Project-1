@@ -116,3 +116,7 @@ Temporary Items
 
 #terraform
 .terraform/
+terraform/terraform.tfstate.backup
+terraform.tfstate.backup
+terraform/terraform.tfstate
+terraform.tfstate
